@@ -1,0 +1,41 @@
+### 1. GET all rooms (Expects 200 OK)
+GET http://localhost:8080/api/rooms
+
+### 2. GET room by ID - Found (Expects 200 OK)
+GET http://localhost:8080/api/rooms/1
+
+### 3. GET room by ID - Not Found (Expects 404)
+GET http://localhost:8080/api/rooms/999
+
+### 4. POST create a new room (Expects 201 Created + Location header)
+POST http://localhost:8080/api/rooms
+Content-Type: application/json
+
+{
+  "name": "Rooftop Room",
+  "capacity": 12
+}
+
+### 5. PUT update existing room (Expects 200 OK)
+PUT http://localhost:8080/api/rooms/1
+Content-Type: application/json
+
+{
+  "name": "Seminar A (Updated)",
+  "capacity": 15
+}
+
+### 6. PUT update non-existing room (Expects 404)
+PUT http://localhost:8080/api/rooms/999
+Content-Type: application/json
+
+{
+  "name": "Ghost Room",
+  "capacity": 0
+}
+
+### 7. DELETE existing room (Expects 204 No Content)
+DELETE http://localhost:8080/api/rooms/2
+
+### 8. DELETE non-existing room (Expects 404)
+DELETE http://localhost:8080/api/rooms/999
