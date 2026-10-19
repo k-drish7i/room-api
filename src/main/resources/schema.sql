@@ -1,0 +1,14 @@
+CREATE TABLE room (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    capacity INT NOT NULL CHECK (capacity BETWEEN 1 AND 20)
+);
+
+CREATE TABLE reservation (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    room_id BIGINT NOT NULL,
+    reserved_by VARCHAR(50) NOT NULL,
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP NOT NULL,
+    FOREIGN KEY (room_id) REFERENCES room(id)
+);
