@@ -1,6 +1,21 @@
 # Room API
 
-The Room API is a layered RESTful web service for managing room resources, built with Spring Boot using a three-layer architecture (Controller, Service, Repository).
+The Room API is a layered RESTful web service for managing room resources, built with Spring Boot using a three-layer architecture (Controller, Service, Repository) with an H2 relational database backend.
+
+## Database
+
+The application uses an embedded H2 database initialized on startup with `schema.sql` and `data.sql`.
+
+### Tables and Relationships
+- **room**: `id` (PK, BIGINT), `name` (VARCHAR), `capacity` (INT, CHECK 1-20)
+- **reservation**: `id` (PK, BIGINT), `room_id` (FK -> room.id), `reserved_by` (VARCHAR), `start_time` (TIMESTAMP), `end_time` (TIMESTAMP)
+- **Relationship**: One-to-Many (`room` 1 : N `reservation`). Each reservation references one room via foreign key `room_id`.
+
+### H2 Console Access
+- **Console URL**: `http://localhost:8080/h2-console`
+- **JDBC URL**: `jdbc:h2:mem:roomdb`
+- **User Name**: `sa`
+- **Password**: *(leave blank)*
 
 ## Endpoints
 
@@ -24,4 +39,4 @@ The Room API is a layered RESTful web service for managing room resources, built
 
 ## AI Declaration
 
-Service and layer refactoring written with assistance from AI, then verified and tested by me.
+SQL schema, queries, and layer structure developed with assistance from AI, then tested and verified by me.
