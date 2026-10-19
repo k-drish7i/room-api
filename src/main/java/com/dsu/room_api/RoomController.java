@@ -91,6 +91,7 @@
 
 package com.dsu.room_api;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -103,15 +104,19 @@ public class RoomController {
 
     private final RoomService service;
 
+    // Constructor injection
     public RoomController(RoomService service) {
         this.service = service;
     }
 
     @GetMapping
-    public ResponseEntity<List<Room>> getAllRooms(@RequestParam(required = false) String keyword) {
-        return ResponseEntity.ok(service.getAllRooms(keyword));
+    public ResponseEntity<List<Room>> getAllRooms(
+            @RequestParam(required = false) Integer minCapacity,
+            @RequestParam(required = false) String keyword) {
+        return ResponseEntity.ok(service.getAllRooms(minCapacity, keyword));
     }
 
+    @Operation(summary = "Find a room by ID")
     @GetMapping("/{id}")
     public ResponseEntity<Room> getRoomById(@PathVariable Long id) {
         return service.getRoomById(id)
@@ -119,24 +124,32 @@ public class RoomController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Create a new room")
     @PostMapping
-    public ResponseEntity<Room> createRoom(@RequestBody Room newRoom) {
-        Room created = service.createRoom(newRoom);
-        URI location = URI.create("/api/rooms/" + created.getId());
-        return ResponseEntity.created(location).body(created);
+    public ResponseEntity<?> createRoom(@RequestBody Room newRoom) {
+        try {
+            Room created = service.createRoom(newRoom);
+            URI location = URI.create("/api/rooms/" + created.getId());
+            return ResponseEntity.created(location).body(created);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Room> updateRoom(@PathVariable Long id, @RequestBody Room updatedData) {
-        return service.updateRoom(id, updatedData)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> updateRoom(@PathVariable Long id, @RequestBody Room updatedData) {
+        try {
+            return service.updateRoom(id, updatedData)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRoom(@PathVariable Long id) {
-        boolean removed = service.deleteRoom(id);
-        if (removed) {
+        if (service.deleteRoom(id)) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
