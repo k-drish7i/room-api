@@ -149,9 +149,13 @@ public class RoomController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRoom(@PathVariable Long id) {
-        if (service.deleteRoom(id)) {
-            return ResponseEntity.noContent().build();
+        try {
+            if (service.deleteRoom(id)) {
+                return ResponseEntity.noContent().build();
+            }
+            return ResponseEntity.notFound().build();
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.CONFLICT).build(); // 409 Conflict
         }
-        return ResponseEntity.notFound().build();
     }
 }
