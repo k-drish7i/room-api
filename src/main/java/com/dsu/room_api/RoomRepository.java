@@ -44,14 +44,34 @@
 //    }
 //}
 
+
+/// ///////////////////////////////////////
+//package com.dsu.room_api;
+//
+//import java.util.List;
+//import java.util.Optional;
+//
+//public interface RoomRepository {
+//    List<Room> findAll();
+//    Optional<Room> findById(Long id);
+//    Room save(Room room);
+//    boolean deleteById(Long id);
+//}
+
+///////////////////////////////////////////////////
+
 package com.dsu.room_api;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
-import java.util.Optional;
 
-public interface RoomRepository {
-    List<Room> findAll();
-    Optional<Room> findById(Long id);
-    Room save(Room room);
-    boolean deleteById(Long id);
+public interface RoomRepository extends JpaRepository<Room, Long> {
+
+    // Spring writes the SQL queries automatically from these method names!
+    List<Room> findByNameContainingIgnoreCase(String keyword);
+
+    List<Room> findByCapacityGreaterThanEqualAndNameContainingIgnoreCase(
+            int minCapacity, String keyword);
+
+    List<Room> findByCapacityGreaterThanEqual(int minCapacity);
 }
