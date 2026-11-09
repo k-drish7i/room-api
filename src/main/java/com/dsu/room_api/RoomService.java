@@ -105,13 +105,12 @@
 //}
 
 ///////////////////////////////////
-
 package com.dsu.room_api;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class RoomService {
@@ -122,7 +121,7 @@ public class RoomService {
         this.repository = repository;
     }
 
-    public List<Room> getAllRooms(Integer minCapacity, String keyword) {
+    public List<Room> search(Integer minCapacity, String keyword) {
         boolean hasMin = (minCapacity != null);
         boolean hasKey = (keyword != null && !keyword.isBlank());
 
@@ -137,35 +136,32 @@ public class RoomService {
         }
     }
 
-    public Optional<Room> getRoomById(Long id) {
-        return repository.findById(id);
+    // Helper method: gets the managed entity or throws NotFoundException (404)
+    public Room get(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("room " + id + " not found"));
     }
 
-    public Room createRoom(Room room) {
-        validateCapacity(room.getCapacity());
-        return repository.save(room);
+    public Room create(String name, int capacity) {
+        return repository.save(new Room(null, name, capacity));
     }
 
-    public Optional<Room> updateRoom(Long id, Room updatedData) {
-        validateCapacity(updatedData.getCapacity());
+    // Requirement 2: Dirty checking with @Transactional and NO save() call
+    @Transactional
+    public Room update(Long id, String name, int capacity) {
+        Room room = get(id);
+        room.update(name, capacity);
+        return room;
+    }
+
+    public void delete(Long id) {
         if (!repository.existsById(id)) {
-            return Optional.empty();
-        }
-        updatedData.setId(id);
-        return Optional.of(repository.save(updatedData));
-    }
-
-    public boolean deleteRoom(Long id) {
-        if (!repository.existsById(id)) {
-            return false;
+            throw new NotFoundException("room " + id + " not found");
         }
         repository.deleteById(id);
-        return true;
     }
 
-    private void validateCapacity(Integer capacity) {
-        if (capacity == null || capacity < 1 || capacity > 20) {
-            throw new IllegalArgumentException("Capacity must be between 1 and 20");
-        }
+    public long count() {
+        return repository.count();
     }
 }

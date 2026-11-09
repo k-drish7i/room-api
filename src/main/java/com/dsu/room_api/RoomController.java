@@ -89,9 +89,85 @@
 //    }
 //}
 
+/// /////////////////////////////////////////////////
+
+//package com.dsu.room_api;
+//
+//import io.swagger.v3.oas.annotations.Operation;
+//import org.springframework.http.ResponseEntity;
+//import org.springframework.web.bind.annotation.*;
+//
+//import java.net.URI;
+//import java.util.List;
+//
+//@RestController
+//@RequestMapping("/api/rooms")
+//public class RoomController {
+//
+//    private final RoomService service;
+//
+//    // Constructor injection
+//    public RoomController(RoomService service) {
+//        this.service = service;
+//    }
+//
+//    @GetMapping
+//    public ResponseEntity<List<Room>> getAllRooms(
+//            @RequestParam(required = false) Integer minCapacity,
+//            @RequestParam(required = false) String keyword) {
+//        return ResponseEntity.ok(service.getAllRooms(minCapacity, keyword));
+//    }
+//
+//    @Operation(summary = "Find a room by ID")
+//    @GetMapping("/{id}")
+//    public ResponseEntity<Room> getRoomById(@PathVariable Long id) {
+//        return service.getRoomById(id)
+//                .map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.notFound().build());
+//    }
+//
+//    @Operation(summary = "Create a new room")
+//    @PostMapping
+//    public ResponseEntity<?> createRoom(@RequestBody Room newRoom) {
+//        try {
+//            Room created = service.createRoom(newRoom);
+//            URI location = URI.create("/api/rooms/" + created.getId());
+//            return ResponseEntity.created(location).body(created);
+//        } catch (IllegalArgumentException e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
+//
+//    @PutMapping("/{id}")
+//    public ResponseEntity<?> updateRoom(@PathVariable Long id, @RequestBody Room updatedData) {
+//        try {
+//            return service.updateRoom(id, updatedData)
+//                    .map(ResponseEntity::ok)
+//                    .orElse(ResponseEntity.notFound().build());
+//        } catch (IllegalArgumentException e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
+//
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<Void> deleteRoom(@PathVariable Long id) {
+//        try {
+//            if (service.deleteRoom(id)) {
+//                return ResponseEntity.noContent().build();
+//            }
+//            return ResponseEntity.notFound().build();
+//        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+//            return ResponseEntity.status(org.springframework.http.HttpStatus.CONFLICT).build(); // 409 Conflict
+//        }
+//    }
+//}
+
+/// ///////////////////////////////////////
 package com.dsu.room_api;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -102,60 +178,43 @@ import java.util.List;
 @RequestMapping("/api/rooms")
 public class RoomController {
 
-    private final RoomService service;
+    private final RoomService roomService;
 
-    // Constructor injection
-    public RoomController(RoomService service) {
-        this.service = service;
+    public RoomController(RoomService roomService) {
+        this.roomService = roomService;
     }
 
     @GetMapping
-    public ResponseEntity<List<Room>> getAllRooms(
+    public List<RoomResponse> list(
             @RequestParam(required = false) Integer minCapacity,
             @RequestParam(required = false) String keyword) {
-        return ResponseEntity.ok(service.getAllRooms(minCapacity, keyword));
+        return roomService.search(minCapacity, keyword).stream()
+                .map(RoomResponse::from)
+                .toList();
     }
 
     @Operation(summary = "Find a room by ID")
     @GetMapping("/{id}")
-    public ResponseEntity<Room> getRoomById(@PathVariable Long id) {
-        return service.getRoomById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public RoomResponse findOne(@PathVariable Long id) {
+        return RoomResponse.from(roomService.get(id));
     }
 
     @Operation(summary = "Create a new room")
     @PostMapping
-    public ResponseEntity<?> createRoom(@RequestBody Room newRoom) {
-        try {
-            Room created = service.createRoom(newRoom);
-            URI location = URI.create("/api/rooms/" + created.getId());
-            return ResponseEntity.created(location).body(created);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<RoomResponse> create(@Valid @RequestBody RoomCreateRequest request) {
+        Room room = roomService.create(request.name(), request.capacity());
+        URI location = URI.create("/api/rooms/" + room.getId());
+        return ResponseEntity.created(location).body(RoomResponse.from(room));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateRoom(@PathVariable Long id, @RequestBody Room updatedData) {
-        try {
-            return service.updateRoom(id, updatedData)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public RoomResponse replace(@PathVariable Long id, @Valid @RequestBody RoomCreateRequest request) {
+        return RoomResponse.from(roomService.update(id, request.name(), request.capacity()));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRoom(@PathVariable Long id) {
-        try {
-            if (service.deleteRoom(id)) {
-                return ResponseEntity.noContent().build();
-            }
-            return ResponseEntity.notFound().build();
-        } catch (org.springframework.dao.DataIntegrityViolationException e) {
-            return ResponseEntity.status(org.springframework.http.HttpStatus.CONFLICT).build(); // 409 Conflict
-        }
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        roomService.delete(id);
     }
 }
