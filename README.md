@@ -1,85 +1,81 @@
 # Room API
 
-The Room API is a layered RESTful web service for managing rooms and reservations, built with Spring Boot using a three-layer architecture (Controller, Service, Repository) backed by MySQL and Spring Data JPA.
+The Room API is a layered RESTful web service for managing rooms and reservations, built with Spring Boot using a three-layer architecture (Controller, Service, Repository) backed by MySQL, Spring Data JPA, and stateless JWT/Basic Spring Security.
 
-## Errors
+## Authentication
 
-All error responses across the entire API share the uniform `ApiError` JSON body structure.
+### Public vs. Protected Endpoints
+- **Public (No Login Required)**:
+    - `GET /api/rooms` and `GET /api/rooms/{id}` (reading room details)
+    - `POST /api/auth/signup` (creating a new account)
+    - `POST /api/auth/login` (exchanging credentials for a JWT)
+    - Swagger UI & OpenAPI docs (`/swagger-ui/**`, `/v3/api-docs/**`)
+- **Protected (Authentication Required)**:
+    - All `POST`, `PUT`, and `DELETE` endpoints on `/api/rooms/**` and `/api/reservations/**`
+    - All `GET` endpoints on `/api/reservations/**`
+    - `GET /api/auth/me`
 
-### ApiError Shape
-```json
+### How to Get and Send a Token
+1. **Obtain a Token**: Send a `POST` request to `/api/auth/login` with a JSON body containing `"username"` and `"password"`. The server returns a JSON response with an `accessToken` field.
+2. **Send the Token**: Include the token in the `Authorization` HTTP header of subsequent requests using the `Bearer` scheme:
+   ```http
+   Authorization: Bearer <your-access-token>
+
+(HTTP Basic authentication is also supported for classroom testing).
+
+Sample Accounts
+Running reset.sql seeds the app_user table with three sample accounts (passwords are stored exclusively as BCrypt hashes):
+Username,Password,Role
+mina,mina1234,USER
+omar,omar1234,USER
+admin,admin1234,ADMIN
+
+Errors
+All error responses across the entire API—including security filter rejections—share the uniform ApiError JSON body structure.
 {
-  "status": 400,
-  "error": "Bad Request",
-  "message": "request has invalid fields",
-  "path": "/api/rooms",
-  "fieldErrors": [
-    {
-      "field": "capacity",
-      "message": "capacity must be between 1 and 20"
-    }
-  ]
+"status": 400,
+"error": "Bad Request",
+"message": "request has invalid fields",
+"path": "/api/rooms",
+"fieldErrors": [
+{
+"field": "capacity",
+"message": "capacity must be between 1 and 20"
+}
+]
 }
 
-```
+HTTP Error Status Meanings
+Status Code,Status Name,Meaning in This API
+400,Bad Request,"Client validation failure: invalid JSON payload, invalid field constraints (@Valid), start time not before end time, missing required parameters, or path variable type mismatch."
+401,Unauthorized,"Authentication failure: missing credentials (login required), invalid username/password (wrong username or password), or malformed/expired JWT (token is invalid or expired)."
+404,Not Found,Requested entity (room or reservation) or URL path does not exist.
+409,Conflict,"Domain logic or database constraint collision: duplicate username on sign-up, reservation time overlap, or attempting to delete a room with active reservations."
+500,Internal Server Error,Unhandled server exception (hidden from client for security; actual error logged server-side).
 
-### HTTP Error Status Meanings
-
-| Status Code | Status Name | Meaning in This API |
-| --- | --- | --- |
-| **400** | Bad Request | Client validation failure: invalid JSON payload, invalid field constraints (`@Valid`), start time not before end time, missing required parameters, or path variable type mismatch. |
-| **404** | Not Found | Requested entity (room or reservation) or URL path does not exist. |
-| **409** | Conflict | Domain logic or database constraint collision: reservation time overlap or attempting to delete a room with active reservations. |
-| **500** | Internal Server Error | Unhandled server exception (hidden from client for security; actual error logged server-side). |
-
-## Database Setup
-
+Database Setup
 Run these commands in MySQL as root before starting the application:
 
-```sql
+SQL
 CREATE DATABASE roomdb;
 CREATE USER 'roomapp'@'localhost' IDENTIFIED BY 'roomapp1234';
 GRANT ALL PRIVILEGES ON roomdb.* TO 'roomapp'@'localhost';
 
-```
+To initialize or reset all tables (room, reservation, and app_user) with sample data, execute reset.sql.
 
-Then execute `schema.sql` and `data.sql` to initialize the tables and sample data. To reset data at any time, execute `reset.sql`.
+Environment & Requirements
+JDK Version: Java 21
 
-## Endpoints
+JWT Secret: Configured via the JWT_SECRET environment variable (app.jwt.secret), falling back to a development default in application.properties.
 
-### Rooms (`/api/rooms`)
+API Documentation: Available at http://localhost:8080/swagger-ui.html
 
-| Method | Path | Status Code | Description |
-| --- | --- | --- | --- |
-| `GET` | `/api/rooms` | `200 OK` | Retrieves all rooms (supports `minCapacity` and `keyword` filters) |
-| `GET` | `/api/rooms/{id}` | `200 OK` / `404 Not Found` | Retrieves a single room by ID |
-| `POST` | `/api/rooms` | `201 Created` / `400 Bad Request` | Creates a new room (returns `Location` header; 400 if validation fails) |
-| `PUT` | `/api/rooms/{id}` | `200 OK` / `400 Bad Request` / `404 Not Found` | Updates a room via dirty checking |
-| `DELETE` | `/api/rooms/{id}` | `204 No Content` / `404 Not Found` / `409 Conflict` | Deletes a room by ID (409 if room has active reservations) |
+How to Run
+Ensure MySQL is running on localhost:3306 with roomdb configured and reset.sql executed.
 
-### Reservations (`/api/reservations`)
+In IntelliJ IDEA, run RoomApiApplication.java (or run ./gradlew bootRun).
 
-| Method | Path | Status Code | Description |
-| --- | --- | --- | --- |
-| `GET` | `/api/reservations` | `200 OK` / `400 Bad Request` | Retrieves reservations filtered by `reservedBy` |
-| `GET` | `/api/reservations/{id}` | `200 OK` / `404 Not Found` | Retrieves a single reservation by ID |
-| `POST` | `/api/reservations` | `201 Created` / `400 Bad Request` / `404 Not Found` / `409 Conflict` | Creates a reservation (checks room existence, time order, and overlap) |
-| `DELETE` | `/api/reservations/{id}` | `204 No Content` / `404 Not Found` | Deletes a reservation by ID |
+The server runs on http://localhost:8080.
 
-## Environment & Requirements
-
-* **JDK Version**: Java 21
-* **API Documentation**: Available at `http://localhost:8080/swagger-ui.html`
-
-## How to Run
-
-1. Ensure MySQL is running on `localhost:3306` with `roomdb` configured.
-2. In IntelliJ IDEA, run `RoomApiApplication.java` (or run `./gradlew bootRun`).
-3. The server runs on `http://localhost:8080`.
-
-## AI Declaration
-
-Validation annotations, global exception handling advice, DTO isolation, and dirty-checking persistence logic implemented with assistance from AI, verified and tested by me.
-
-```
-
+AI Declaration
+Spring Security filter chain configuration, BCrypt password encoding, JWT encoder/decoder setup, and security entry-point exception handling implemented with assistance from AI, verified and tested by me.

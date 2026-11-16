@@ -3,6 +3,7 @@ package com.dsu.room_api;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -19,10 +20,20 @@ public class ReservationController {
     }
 
     @GetMapping
-    public List<ReservationResponse> listByReservedBy(@RequestParam String reservedBy) {
-        return service.findByReservedBy(reservedBy).stream()
-                .map(ReservationResponse::from)
-                .toList();
+    public List<ReservationResponse> list(
+            @RequestParam(required = false) Long roomId,
+            @RequestParam(required = false) String reservedBy) throws MissingServletRequestParameterException {
+        if (roomId != null) {
+            return service.findByRoom(roomId).stream()
+                    .map(ReservationResponse::from)
+                    .toList();
+        }
+        if (reservedBy != null) {
+            return service.findByReservedBy(reservedBy).stream()
+                    .map(ReservationResponse::from)
+                    .toList();
+        }
+        throw new MissingServletRequestParameterException("reservedBy", "String");
     }
 
     @GetMapping("/{id}")

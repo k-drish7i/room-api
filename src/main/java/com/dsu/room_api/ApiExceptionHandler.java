@@ -74,4 +74,17 @@ public class ApiExceptionHandler {
         }
         return respond(HttpStatus.INTERNAL_SERVER_ERROR, "unexpected server error", request, List.of());
     }
+
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ResponseEntity<ApiError> unauthorized(
+            org.springframework.security.core.AuthenticationException e,
+            HttpServletRequest request) {
+        String message = "login required";
+        if (e instanceof org.springframework.security.authentication.BadCredentialsException) {
+            message = "wrong username or password";
+        } else if (e instanceof org.springframework.security.oauth2.server.resource.InvalidBearerTokenException) {
+            message = "token is invalid or expired";
+        }
+        return respond(HttpStatus.UNAUTHORIZED, message, request, List.of());
+    }
 }

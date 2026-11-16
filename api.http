@@ -1,23 +1,24 @@
-### 1. GET all rooms (Expect: 200, 3 rooms)
+### 1. GET all rooms - Public (Expect: 200, 3 rooms)
 GET http://localhost:8080/api/rooms
 
-### 2. GET rooms with minCapacity=6 (Expect: 200, 2 rooms)
+### 2. GET rooms with minCapacity=6 - Public (Expect: 200, 2 rooms)
 GET http://localhost:8080/api/rooms?minCapacity=6
 
-### 3. GET rooms with keyword=Seminar (Expect: 200, 1 room)
+### 3. GET rooms with keyword=Seminar - Public (Expect: 200, 1 room)
 GET http://localhost:8080/api/rooms?keyword=Seminar
 
-### 4. GET rooms with minCapacity=6 and keyword=Seminar (Expect: 200, 1 room)
+### 4. GET rooms with minCapacity=6 and keyword=Seminar - Public (Expect: 200, 1 room)
 GET http://localhost:8080/api/rooms?minCapacity=6&keyword=Seminar
 
-### 5. GET room 1 (Expect: 200, Seminar A)
+### 5. GET room 1 - Public (Expect: 200, Seminar A)
 GET http://localhost:8080/api/rooms/1
 
-### 6. GET room 99 (Expect: 404 Not Found)
+### 6. GET room 99 - Public (Expect: 404 Not Found)
 GET http://localhost:8080/api/rooms/99
 
 ### 7. POST create room Library (Expect: 201 Created + Location header)
 POST http://localhost:8080/api/rooms
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -27,6 +28,7 @@ Content-Type: application/json
 
 ### 8. PUT room 4 change capacity to 15 (Expect: 200 OK)
 PUT http://localhost:8080/api/rooms/4
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -36,6 +38,7 @@ Content-Type: application/json
 
 ### 9. PUT room 99 (Expect: 404 Not Found)
 PUT http://localhost:8080/api/rooms/99
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -45,12 +48,15 @@ Content-Type: application/json
 
 ### 10. DELETE room 4 (Expect: 204 No Content)
 DELETE http://localhost:8080/api/rooms/4
+Authorization: Basic bWluYTptaW5hMTIzNA==
 
 ### 11. DELETE room 4 again (Expect: 404 Not Found)
 DELETE http://localhost:8080/api/rooms/4
+Authorization: Basic bWluYTptaW5hMTIzNA==
 
 ### 12. POST create room capacity 0 (Expect: 400 Bad Request)
 POST http://localhost:8080/api/rooms
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -60,6 +66,7 @@ Content-Type: application/json
 
 ### 13. PUT room 1 capacity 25 (Expect: 400 Bad Request)
 PUT http://localhost:8080/api/rooms/1
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -67,20 +74,24 @@ Content-Type: application/json
   "capacity": 25
 }
 
-### 14. GET stats room count (Expect: 200, {"rooms": 3})
+### 14. GET rooms count check (Expect: 200, 3 rooms)
 GET http://localhost:8080/api/rooms
 
 ### 15. GET reservations for room 1 (Expect: 200, 3 reservations)
 GET http://localhost:8080/api/reservations?roomId=1
+Authorization: Basic bWluYTptaW5hMTIzNA==
 
 ### 16. GET reservations for room 99 (Expect: 404 Not Found)
 GET http://localhost:8080/api/reservations?roomId=99
+Authorization: Basic bWluYTptaW5hMTIzNA==
 
 ### 17. GET reservations by Mina (Expect: 200, 2 reservations)
 GET http://localhost:8080/api/reservations?reservedBy=Mina
+Authorization: Basic bWluYTptaW5hMTIzNA==
 
 ### 18. POST reservation for room 1 (Expect: 201 Created + Location)
 POST http://localhost:8080/api/reservations
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -92,6 +103,7 @@ Content-Type: application/json
 
 ### 19. POST reservation touching edge 11:00 (Expect: 201 Created)
 POST http://localhost:8080/api/reservations
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -103,6 +115,7 @@ Content-Type: application/json
 
 ### 20. POST reservation overlapping Mina 10:30-11:30 (Expect: 409 Conflict)
 POST http://localhost:8080/api/reservations
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -114,6 +127,7 @@ Content-Type: application/json
 
 ### 21. POST reservation room 99 (Expect: 404 Not Found)
 POST http://localhost:8080/api/reservations
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -125,6 +139,7 @@ Content-Type: application/json
 
 ### 22. POST reservation end before start (Expect: 400 Bad Request)
 POST http://localhost:8080/api/reservations
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -136,6 +151,7 @@ Content-Type: application/json
 
 ### 23. POST reservation start equals end (Expect: 400 Bad Request)
 POST http://localhost:8080/api/reservations
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -147,12 +163,15 @@ Content-Type: application/json
 
 ### 24. GET single reservation 1 (Expect: 200 OK)
 GET http://localhost:8080/api/reservations/1
+Authorization: Basic bWluYTptaW5hMTIzNA==
 
 ### 25. DELETE reservation 1 (Expect: 204 No Content)
 DELETE http://localhost:8080/api/reservations/1
+Authorization: Basic bWluYTptaW5hMTIzNA==
 
 ### 26. PUT room 2 same values (Expect: 200, dirty check: select only, no update)
 PUT http://localhost:8080/api/rooms/2
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -162,6 +181,7 @@ Content-Type: application/json
 
 ### 27. PUT room 2 new values (Expect: 200, dirty check: select + update)
 PUT http://localhost:8080/api/rooms/2
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -171,6 +191,7 @@ Content-Type: application/json
 
 ### 28. POST room blank name (Expect: 400, fieldErrors: name)
 POST http://localhost:8080/api/rooms
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -180,6 +201,7 @@ Content-Type: application/json
 
 ### 29. POST room capacity 0 (Expect: 400, fieldErrors: capacity)
 POST http://localhost:8080/api/rooms
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -189,6 +211,7 @@ Content-Type: application/json
 
 ### 30. POST room blank name and capacity 50 (Expect: 400, two fieldErrors)
 POST http://localhost:8080/api/rooms
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -201,12 +224,14 @@ GET http://localhost:8080/api/rooms/99
 
 ### 32. DELETE room 1 with active reservations (Expect: 409 Conflict)
 DELETE http://localhost:8080/api/rooms/1
+Authorization: Basic bWluYTptaW5hMTIzNA==
 
 ### 33. GET unknown URL (Expect: 404, not 500)
 GET http://localhost:8080/api/nothing
 
 ### 34. POST reservation blank reservedBy (Expect: 400, fieldErrors: reservedBy)
 POST http://localhost:8080/api/reservations
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -218,6 +243,7 @@ Content-Type: application/json
 
 ### 35. POST reservation no endTime (Expect: 400, fieldErrors: endTime)
 POST http://localhost:8080/api/reservations
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -228,6 +254,7 @@ Content-Type: application/json
 
 ### 36. POST reservation end before start (Expect: 400, startTime must be before endTime)
 POST http://localhost:8080/api/reservations
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -239,6 +266,7 @@ Content-Type: application/json
 
 ### 37. POST reservation overlapping existing (Expect: 409, already booked)
 POST http://localhost:8080/api/reservations
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -250,12 +278,15 @@ Content-Type: application/json
 
 ### 38. GET reservation 99 (Expect: 404, reservation 99 not found)
 GET http://localhost:8080/api/reservations/99
+Authorization: Basic bWluYTptaW5hMTIzNA==
 
 ### 39. GET reservations without required parameter (Expect: 400 Bad Request)
 GET http://localhost:8080/api/reservations
+Authorization: Basic bWluYTptaW5hMTIzNA==
 
 ### 40. POST room with invalid JSON type (Expect: 400, not valid JSON)
 POST http://localhost:8080/api/rooms
+Authorization: Basic bWluYTptaW5hMTIzNA==
 Content-Type: application/json
 
 {
@@ -266,19 +297,116 @@ Content-Type: application/json
 ### 41. GET room with wrong path variable type (Expect: 400, 'id' has the wrong type)
 GET http://localhost:8080/api/rooms/abc
 
-### 42. POST room with missing name field (Expect: 400 Bad Request)
+### 42. POST room without login (Expect: 401 login required)
 POST http://localhost:8080/api/rooms
 Content-Type: application/json
 
 {
-  "capacity": 10
+  "name": "No Login Room",
+  "capacity": 5
 }
 
-### 43. PUT non-existent room 999 (Expect: 404 Not Found)
-PUT http://localhost:8080/api/rooms/999
+### 43. Sign up lee / lee12345 (Expect: 201 Created)
+POST http://localhost:8080/api/auth/signup
 Content-Type: application/json
 
 {
-  "name": "Ghost Room",
+  "username": "lee",
+  "password": "lee12345"
+}
+
+### 44. Sign up lee again (Expect: 409 username lee is taken)
+POST http://localhost:8080/api/auth/signup
+Content-Type: application/json
+
+{
+  "username": "lee",
+  "password": "lee12345"
+}
+
+### 45. Sign up invalid username and short password (Expect: 400 two fieldErrors)
+POST http://localhost:8080/api/auth/signup
+Content-Type: application/json
+
+{
+  "username": "Lee!",
+  "password": "short"
+}
+
+### 46. POST room as lee with HTTP Basic (Expect: 201 Created)
+POST http://localhost:8080/api/rooms
+Authorization: Basic bGVlOmxlZTEyMzQ1
+Content-Type: application/json
+
+{
+  "name": "Lee Room",
+  "capacity": 8
+}
+
+### 47. POST room with wrong password (Expect: 401 wrong username or password)
+POST http://localhost:8080/api/rooms
+Authorization: Basic bGVlOndyb25ncGFzc3dvcmQ=
+Content-Type: application/json
+
+{
+  "name": "Wrong Pass Room",
+  "capacity": 8
+}
+
+### 48. GET rooms without login (Expect: 200 OK, 4 rooms)
+GET http://localhost:8080/api/rooms
+
+### 49. GET /api/auth/me as lee with Basic (Expect: 200 lee, ROLE_USER)
+GET http://localhost:8080/api/auth/me
+Authorization: Basic bGVlOmxlZTEyMzQ1
+
+### 50. Log in as lee to get JWT token (Expect: 200 accessToken)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "lee",
+  "password": "lee12345"
+}
+
+> {% client.global.set("token", response.body.accessToken); %}
+
+### 51. Log in with wrong password (Expect: 401 wrong username or password)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "lee",
+  "password": "wrongpassword"
+}
+
+### 52. GET /api/auth/me with Bearer token (Expect: 200 lee)
+GET http://localhost:8080/api/auth/me
+Authorization: Bearer {{token}}
+
+### 53. POST room with Bearer token (Expect: 201 Created)
+POST http://localhost:8080/api/rooms
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Token Room",
   "capacity": 10
 }
+
+### 54. POST room with broken token (Expect: 401 token is invalid or expired)
+POST http://localhost:8080/api/rooms
+Authorization: Bearer invalid.broken.token
+Content-Type: application/json
+
+{
+  "name": "Broken Token Room",
+  "capacity": 10
+}
+
+### 55. GET rooms with broken token (Expect: 401 token is invalid or expired)
+GET http://localhost:8080/api/rooms
+Authorization: Bearer invalid.broken.token
+
+### 56. GET reservations without login (Expect: 401 login required)
+GET http://localhost:8080/api/reservations?reservedBy=Mina
