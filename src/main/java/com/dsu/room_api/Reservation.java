@@ -10,32 +10,38 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
 
-    @Column(nullable = false, length = 50)
-    private String reservedBy;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private AppUser owner;
 
-    @Column(nullable = false)
     private LocalDateTime startTime;
-
-    @Column(nullable = false)
     private LocalDateTime endTime;
 
     protected Reservation() {}
 
-    public Reservation(Long id, Room room, String reservedBy, LocalDateTime startTime, LocalDateTime endTime) {
-        this.id = id;
+    public Reservation(Room room, AppUser owner, LocalDateTime startTime, LocalDateTime endTime) {
         this.room = room;
-        this.reservedBy = reservedBy;
+        this.owner = owner;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+
+    public boolean isOwnedBy(String username) {
+        return owner.getUsername().equals(username);
+    }
+
+    public void reschedule(LocalDateTime startTime, LocalDateTime endTime) {
         this.startTime = startTime;
         this.endTime = endTime;
     }
 
     public Long getId() { return id; }
     public Room getRoom() { return room; }
-    public String getReservedBy() { return reservedBy; }
+    public AppUser getOwner() { return owner; }
     public LocalDateTime getStartTime() { return startTime; }
     public LocalDateTime getEndTime() { return endTime; }
 }

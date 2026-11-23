@@ -3,6 +3,7 @@ package com.dsu.room_api;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -10,15 +11,28 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final RoomRepository roomRepository;
+    private final AppUserRepository userRepository;
 
-    public ReservationService(ReservationRepository reservationRepository, RoomRepository roomRepository) {
+    public ReservationService(
+            ReservationRepository reservationRepository,
+            RoomRepository roomRepository,
+            AppUserRepository userRepository) {
         this.reservationRepository = reservationRepository;
         this.roomRepository = roomRepository;
+        this.userRepository = userRepository;
     }
 
-    public Reservation get(Long id) {
-        return reservationRepository.findById(id)
+    private Reservation find(Long id) {
+        return reservationRepository.findDetailById(id)
                 .orElseThrow(() -> new NotFoundException("reservation " + id + " not found"));
+    }
+
+    public Reservation get(Long id, String username, boolean admin) {
+        Reservation r = find(id);
+        if (!admin && !r.isOwnedBy(username)) {
+            throw new ForbiddenException("reservation " + id + " belongs to another user");
+        }
+        return r;
     }
 
     public List<Reservation> findByRoom(Long roomId) {
@@ -28,33 +42,55 @@ public class ReservationService {
         return reservationRepository.findByRoomId(roomId);
     }
 
-    public List<Reservation> findByReservedBy(String reservedBy) {
-        return reservationRepository.findByReservedBy(reservedBy);
+    public List<Reservation> findMine(String username) {
+        return reservationRepository.findMine(username);
     }
 
     @Transactional
-    public Reservation create(ReservationCreateRequest req) {
-        if (!req.startTime().isBefore(req.endTime())) {
+    public Reservation create(Long roomId, String username, LocalDateTime start, LocalDateTime end) {
+        if (!start.isBefore(end)) {
             throw new IllegalArgumentException("startTime must be before endTime");
         }
 
-        Room room = roomRepository.findById(req.roomId())
-                .orElseThrow(() -> new NotFoundException("room " + req.roomId() + " not found"));
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new NotFoundException("room " + roomId + " not found"));
 
-        List<Reservation> overlaps = reservationRepository.findOverlapping(
-                req.roomId(), req.startTime(), req.endTime());
-        if (!overlaps.isEmpty()) {
+        if (reservationRepository.countOverlapping(roomId, start, end) > 0) {
             throw new ConflictException("already booked");
         }
 
-        Reservation res = new Reservation(null, room, req.reservedBy(), req.startTime(), req.endTime());
-        return reservationRepository.save(res);
+        AppUser owner = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("user " + username + " not found"));
+
+        return reservationRepository.save(new Reservation(room, owner, start, end));
     }
 
-    public void delete(Long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new NotFoundException("reservation " + id + " not found");
+    // Lab G Task 2: Owner ONLY (not even admin), dirty checking without save()
+    @Transactional
+    public Reservation update(Long id, String username, LocalDateTime start, LocalDateTime end) {
+        if (!start.isBefore(end)) {
+            throw new IllegalArgumentException("startTime must be before endTime");
         }
-        reservationRepository.deleteById(id);
+
+        Reservation r = find(id);
+        if (!r.isOwnedBy(username)) {
+            throw new ForbiddenException("reservation " + id + " belongs to another user");
+        }
+
+        if (reservationRepository.countOverlappingExcept(r.getRoom().getId(), id, start, end) > 0) {
+            throw new ConflictException("already booked");
+        }
+
+        r.reschedule(start, end);
+        return r;
+    }
+
+    @Transactional
+    public void delete(Long id, String username, boolean admin) {
+        Reservation r = find(id);
+        if (!admin && !r.isOwnedBy(username)) {
+            throw new ForbiddenException("reservation " + id + " belongs to another user");
+        }
+        reservationRepository.delete(r);
     }
 }

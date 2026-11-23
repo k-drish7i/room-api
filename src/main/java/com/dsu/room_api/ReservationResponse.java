@@ -6,7 +6,7 @@ public record ReservationResponse(
         Long id,
         Long roomId,
         String roomName,
-        String reservedBy,
+        String owner,
         LocalDateTime startTime,
         LocalDateTime endTime
 ) {
@@ -15,7 +15,7 @@ public record ReservationResponse(
                 r.getId(),
                 r.getRoom().getId(),
                 r.getRoom().getName(),
-                r.getReservedBy(),
+                r.getOwner().getUsername(),
                 r.getStartTime(),
                 r.getEndTime()
         );

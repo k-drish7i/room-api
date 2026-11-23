@@ -87,4 +87,18 @@ public class ApiExceptionHandler {
         }
         return respond(HttpStatus.UNAUTHORIZED, message, request, List.of());
     }
+
+    // Ownership violation from service (Rule C) -> 403
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ApiError> forbidden(ForbiddenException e, HttpServletRequest request) {
+        return respond(HttpStatus.FORBIDDEN, e.getMessage(), request, List.of());
+    }
+
+    // Role violation from URL rules (Rule D) -> 403
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ApiError> accessDenied(
+            org.springframework.security.access.AccessDeniedException e,
+            HttpServletRequest request) {
+        return respond(HttpStatus.FORBIDDEN, "admin role required", request, List.of());
+    }
 }
