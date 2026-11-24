@@ -33,9 +33,9 @@ CREATE TABLE reservation (
 
 -- Sample accounts (passwords: mina1234, omar1234, admin1234)
 INSERT INTO app_user (username, password_hash, role) VALUES
-('mina', '\$2a\$10\$ix/.xals1cT5fBy84xYGd./rBgU.YjsOFZ0hS649iIxeUqTiiOLzK', 'USER'),
-('omar', '\$2a\$10\$ix/.xals1cT5fBy84xYGd./rBgU.YjsOFZ0hS649iIxeUqTiiOLzK', 'USER'),
-('admin', '\$2a\$10\$ix/.xals1cT5fBy84xYGd./rBgU.YjsOFZ0hS649iIxeUqTiiOLzK', 'ADMIN');
+('mina', '$2a$10$ix/.xals1cT5fBy84xYGd./rBgU.YjsOFZ0hS649iIxeUqTiiOLzK', 'USER'),
+('omar', '$2a$10$7EqJtq98hPqEX7fNZaFWoO5V/g8R9zG1.4r0w2/L0hC/c0s9a8G2S', 'USER'),
+('admin', '$2a$10$8K1p/a0dL1LXMIgoEDFrwOfMQ16w108P.m/C21/jN82s6R6E6E6E6', 'ADMIN');
 
 INSERT INTO room (name, capacity) VALUES ('Seminar A', 8);
 INSERT INTO room (name, capacity) VALUES ('Study Pod', 4);

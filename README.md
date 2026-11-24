@@ -78,5 +78,20 @@ In IntelliJ IDEA, run RoomApiApplication.java (or run ./gradlew bootRun).
 
 The server runs on http://localhost:8080 (Swagger UI at http://localhost:8080/swagger-ui.html).
 
+## Tests
+
+### Prerequisites
+- MySQL must be running on `localhost:3306` with the `roomdb` database initialized using **`reset.sql`** (integration tests expect the sample accounts and reservations from `reset.sql`, and each test rolls back automatically via `@Transactional`).
+
+### How to Run
+Run the full test suite (8 Mockito unit tests in `ReservationServiceTest`, 8 MockMvc integration tests in `ApiFailureTest`, and `RoomApiApplicationTests`) from the project root:
+
+```bash
+# Windows
+.\gradlew.bat test
+
+# macOS / Linux
+./gradlew test
+
 AI Declaration
 Role-based JWT authority mapping, custom 403 AccessDeniedHandler wiring, ownership service checks, self-overlap exclusion query, and CORS configuration implemented with assistance from AI, verified and tested by me.
